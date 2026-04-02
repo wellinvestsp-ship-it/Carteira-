@@ -2,33 +2,96 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Carteira</title>
+<title>Carteira Inteligente</title>
+
 <style>
 body { font-family: Arial; background:#111; color:#fff; padding:20px; }
-table { width:100%; border-collapse: collapse; }
+table { width:100%; border-collapse: collapse; margin-top:20px; }
 td, th { border:1px solid #444; padding:8px; text-align:center; }
 .green { color:lime; }
 .orange { color:orange; }
 .red { color:red; }
+button { padding:10px; margin-top:10px; }
+input { padding:8px; }
 </style>
+
 </head>
 
 <body>
 
-<h2>Painel de Investimentos</h2>
+<h2>Carteira Inteligente</h2>
+
+<label>Aporte mensal:</label>
+<input type="number" id="aporte" placeholder="Ex: 1000">
+<button onclick="calcular()">Calcular</button>
 
 <table>
 <tr>
 <th>Ativo</th><th>Saldo</th><th>Aporte</th><th>Final</th><th>Status</th>
 </tr>
-
-<tr><td>BBAS3</td><td>331</td><td>70</td><td>401</td><td class="green">Comprar</td></tr>
-<tr><td>CMIG4</td><td>353</td><td>45</td><td>398</td><td class="green">Comprar</td></tr>
-<tr><td>CXSE3</td><td>329</td><td>70</td><td>399</td><td class="green">Comprar</td></tr>
-<tr><td>BBSE3</td><td>0</td><td>400</td><td>400</td><td class="orange">Prioridade</td></tr>
-<tr><td>PETR4</td><td>567</td><td>-167</td><td>400</td><td class="red">Reduzir</td></tr>
-
+<tbody id="tabela"></tbody>
 </table>
+
+<script>
+let carteira = [
+ {ativo:"BBAS3", saldo:331, status:"buy"},
+ {ativo:"CMIG4", saldo:353, status:"buy"},
+ {ativo:"CXSE3", saldo:329, status:"buy"},
+ {ativo:"BBSE3", saldo:0, status:"buy"},
+ {ativo:"ABCB4", saldo:312, status:"hold"},
+ {ativo:"JHSF3", saldo:317, status:"hold"},
+ {ativo:"RANI3", saldo:357, status:"hold"},
+ {ativo:"TAEE11", saldo:384, status:"hold"},
+ {ativo:"ISAE4", saldo:404, status:"hold"},
+ {ativo:"SAPR4", saldo:410, status:"hold"},
+ {ativo:"PETR4", saldo:567, status:"avoid"},
+ {ativo:"ITUB4", saldo:351, status:"avoid"}
+];
+
+function cor(status){
+ if(status==="buy") return "green";
+ if(status==="hold") return "orange";
+ return "red";
+}
+
+function calcular(){
+ let aporte = parseFloat(document.getElementById("aporte").value);
+ if(!aporte) return;
+
+ let ativos = carteira.filter(a => a.status !== "avoid" && a.saldo < 420);
+
+ let porAtivo = aporte / ativos.length;
+
+ ativos.forEach(a => {
+   a.aporte = Math.min(porAtivo, 420 - a.saldo);
+ });
+
+ carteira.forEach(a => {
+   if(!a.aporte) a.aporte = 0;
+ });
+
+ render();
+}
+
+function render(){
+ let html = "";
+ carteira.forEach(a => {
+   let final = a.saldo + a.aporte;
+   html += `
+   <tr>
+     <td>${a.ativo}</td>
+     <td>${a.saldo}</td>
+     <td>${a.aporte}</td>
+     <td>${final}</td>
+     <td class="${cor(a.status)}">${a.status}</td>
+   </tr>`;
+ });
+
+ document.getElementById("tabela").innerHTML = html;
+}
+
+render();
+</script>
 
 </body>
 </html>
